@@ -1,0 +1,32 @@
+{
+  "name": "nanny",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Process manager for Node.js applications. Restarts services when their dependencies change.",
+  "main": "dist/api.js",
+  "exports": {
+    ".": {
+      "import": "./dist/api.js",
+      "types": "./dist/api.d.ts"
+    }
+  },
+  "bin": {
+    "nanny": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "node --import tsx --test src/*.test.ts src/**/*.test.ts"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "dscan": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "author": "",
+  "license": "ISC"
+}

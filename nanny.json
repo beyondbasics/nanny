@@ -1,0 +1,24 @@
+{
+  "watcher": {
+    "include_dir": [
+      "pkg",
+      "services"
+    ],
+    "exclude_dir": [],
+    "include_files": [
+      "*.ts",
+      "*.js"
+    ],
+    "exclude_files": []
+  },
+  "service_groups": {
+    "group-1": [
+      "service 1"
+    ]
+  },
+  "services": {
+    "service_name": {
+      "entrypoint": "path-to-service"
+    }
+  }
+}
