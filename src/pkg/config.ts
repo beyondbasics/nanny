@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { NannyConfig, ServiceConfig, WatcherConfig } from "./types.js";
 import { Logger } from "./logger.js";
+import { NannyError, ErrorCodes } from "./errors.js";
 
 export class Config {
   private config: NannyConfig;
@@ -10,26 +11,24 @@ export class Config {
     const configPath = path.join(rootDir, "nanny.json");
 
     if (!fs.existsSync(configPath)) {
-      throw new Error(
-        `config file not found: ${configPath}\n  Run \`nanny config init\` to generate one`,
-      );
+      throw new NannyError(ErrorCodes.CONFIG_NOT_FOUND, { path: configPath });
     }
 
     let raw: Record<string, unknown>;
     try {
       raw = JSON.parse(fs.readFileSync(configPath, "utf-8"));
     } catch (err) {
-      throw new Error(
-        `invalid config file: ${err instanceof SyntaxError ? err.message : "failed to parse"}`,
-      );
+      throw new NannyError(ErrorCodes.CONFIG_INVALID_PARSE, {
+        detail: err instanceof SyntaxError ? err.message : "failed to parse",
+      });
     }
 
     if (!raw.services || typeof raw.services !== "object") {
-      throw new Error('config missing "services" section');
+      throw new NannyError(ErrorCodes.CONFIG_MISSING_SERVICES);
     }
 
     if (!raw.watcher || typeof raw.watcher !== "object") {
-      throw new Error('config missing "watcher" section');
+      throw new NannyError(ErrorCodes.CONFIG_MISSING_WATCHER);
     }
 
     if (raw["service_groups"]) {
@@ -72,7 +71,7 @@ export class Config {
   getServiceGroup(name: string): string[] {
     const group = this.config["service_groups"]?.[name];
     if (!group) {
-      throw new Error(`unknown service group: "${name}"`);
+      throw new NannyError(ErrorCodes.SERVICE_GROUP_NOT_FOUND, { name });
     }
     return group;
   }
@@ -80,7 +79,7 @@ export class Config {
   getEntrypoint(serviceName: string): string {
     const svc = this.config.services[serviceName];
     if (!svc) {
-      throw new Error(`unknown service: "${serviceName}"`);
+      throw new NannyError(ErrorCodes.SERVICE_NOT_FOUND, { name: serviceName });
     }
     return svc.entrypoint;
   }

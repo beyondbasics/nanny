@@ -1,3 +1,4 @@
+import path from "node:path";
 import chokidar, { type FSWatcher } from "chokidar";
 import type { DependencyMap, WatcherConfig } from "./types.js";
 import { Restarter } from "./restarter.js";
@@ -86,8 +87,8 @@ export class Watcher {
         }
       }
 
-      if (!matched && parts.length >= 2) {
-        const sharedName = parts[1];
+      if (!matched) {
+        const sharedName = path.dirname(filePath);
         const affected = this.depMap.sharedToServices.get(sharedName);
         if (affected && affected.size > 0) {
           for (const svc of affected) toRestart.add(svc);

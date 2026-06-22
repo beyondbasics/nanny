@@ -16,7 +16,7 @@ Dependency-aware process manager for Node.js microservice architectures and mono
 ## Installation
 
 ```bash
-npm install nanny
+npm install @beyondbasics/nanny
 ```
 
 Or run directly with `tsx` during development:
@@ -106,7 +106,7 @@ nanny config init
 ## Programmatic API
 
 ```typescript
-import { createNanny } from "nanny";
+import { createNanny } from "@beyondbasics/nanny";
 
 const nanny = createNanny({
   rootDir: "/path/to/api",

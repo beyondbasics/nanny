@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createNanny } from "./api.js";
 import { Config } from "./pkg/config.js";
+import { NannyError } from "./pkg/errors.js";
 
 function printUsage(): void {
   process.stdout.write(
@@ -73,6 +74,9 @@ try {
   const nanny = createNanny({ rootDir, dryRun, group });
   nanny.start();
 } catch (err) {
-  console.error(`[nanny] error: ${(err as Error).message}`);
+  const message = err instanceof NannyError
+    ? err.message
+    : `unexpected error: ${(err as Error).message}`;
+  console.error(`[nanny] error: ${message}`);
   process.exit(1);
 }

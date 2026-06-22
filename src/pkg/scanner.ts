@@ -35,19 +35,16 @@ export class Scanner {
 
     for (const file of allFiles) {
       const relative = path.relative(this.rootDir, file).replace(/\\/g, "/");
-      const parts = relative.split("/");
-
       let owned = false;
       for (const [svcName, svcDir] of serviceRoots) {
-        if (relative === svcDir || relative.startsWith(svcDir + "/")) {
+        if (relative.startsWith(svcDir + "/")) {
           fileToSvcName.set(file, svcName);
           owned = true;
           break;
         }
       }
-
-      if (!owned && parts.length >= 2) {
-        fileToPkgName.set(file, parts[1]);
+      if (!owned) {
+        fileToPkgName.set(file, path.dirname(relative));
       }
     }
 
@@ -71,7 +68,6 @@ export class Scanner {
 
     for (const [pkgFile, pkgName] of fileToPkgName) {
       const dependants = result.getAllDependants(pkgFile);
-
       for (const dep of dependants) {
         const svcName = fileToSvcName.get(dep);
         if (svcName) {

@@ -80,12 +80,12 @@ describe("Scanner", () => {
   });
 
   it("sharedToServices maps shared groups to services that depend on them", () => {
-    const authSvcs = depMap.sharedToServices.get("common");
+    const authSvcs = depMap.sharedToServices.get("pkg/common");
     assert(authSvcs);
     assert(authSvcs.has("auth"));
     assert(!authSvcs.has("users"));
 
-    const usersSvcs = depMap.sharedToServices.get("utils");
+    const usersSvcs = depMap.sharedToServices.get("pkg/utils");
     assert(usersSvcs);
     assert(usersSvcs.has("users"));
     assert(!usersSvcs.has("auth"));
@@ -94,11 +94,11 @@ describe("Scanner", () => {
   it("serviceDeps maps services to shared groups they depend on", () => {
     const authDeps = depMap.serviceDeps.get("auth");
     assert(authDeps);
-    assert(authDeps.has("common"));
+    assert(authDeps.has("pkg/common"));
 
     const usersDeps = depMap.serviceDeps.get("users");
     assert(usersDeps);
-    assert(usersDeps.has("utils"));
+    assert(usersDeps.has("pkg/utils"));
   });
 
   it("svcToServices is initially empty when no cross-service deps", () => {
@@ -259,7 +259,7 @@ describe("Scanner flexible structure", () => {
     depMap = scanner.build();
 
     assert(depMap.serviceRoots.get("auth"), "apps/auth");
-    assert(depMap.sharedToServices.get("common")?.has("auth"));
-    assert(depMap.serviceDeps.get("auth")?.has("common"));
+    assert(depMap.sharedToServices.get("lib/common")?.has("auth"));
+    assert(depMap.serviceDeps.get("auth")?.has("lib/common"));
   });
 });

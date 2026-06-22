@@ -6,6 +6,7 @@ import { Config } from "./pkg/config.js";
 import { Scanner } from "./pkg/scanner.js";
 import { Restarter } from "./pkg/restarter.js";
 import { Watcher } from "./pkg/watcher.js";
+import { NannyError, ErrorCodes } from "./pkg/errors.js";
 
 export type { NannyOptions, DependencyMap };
 
@@ -19,7 +20,7 @@ export function createNanny(options: NannyOptions): NannyInstance {
   const rootDir = path.resolve(options.rootDir);
 
   if (!fs.existsSync(rootDir)) {
-    throw new Error(`root directory not found: ${rootDir}`);
+    throw new NannyError(ErrorCodes.ROOT_NOT_FOUND, { path: rootDir });
   }
 
   const logger = new Logger();
@@ -53,7 +54,7 @@ export function createNanny(options: NannyOptions): NannyInstance {
         for (const svc of services) {
           restarter.start(svc);
         }
-        logger.info(`all ${services.length} services started`);
+        logger.info(`all ${services.length} services starting`);
       } else {
         logger.info(`dry-run: would start ${services.length} services`);
         logger.info(`dependency map:`);

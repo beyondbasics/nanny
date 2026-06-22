@@ -1,8 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import type { NannyConfig } from "./types.js";
 import { Logger } from "./logger.js";
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { NannyError, ErrorCodes } from "./errors.js";
 
 export class Restarter {
   private processes = new Map<string, ChildProcess>();
@@ -19,7 +18,10 @@ export class Restarter {
   start(serviceName: string): void {
     const entrypoint = this.config.services[serviceName]?.entrypoint;
     if (!entrypoint) {
-      this.logger.error(`unknown service: "${serviceName}"`);
+      const err = new NannyError(ErrorCodes.SERVICE_NOT_FOUND, {
+        name: serviceName,
+      });
+      this.logger.error(err.message);
       return;
     }
 
@@ -61,7 +63,11 @@ export class Restarter {
     });
 
     proc.on("error", (err) => {
-      this.logger.error(`${serviceName} spawn error: ${err.message}`);
+      const e = new NannyError(ErrorCodes.SPAWN_ERROR, {
+        name: serviceName,
+        detail: err.message,
+      });
+      this.logger.error(e.message);
       this.processes.delete(serviceName);
     });
 
@@ -75,16 +81,29 @@ export class Restarter {
     this.processes.delete(serviceName);
   }
 
-  async restartAll(serviceNames: string[]): Promise<void> {
-    for (const name of serviceNames) {
-      const proc = this.processes.get(name);
-      if (proc) {
-        proc.kill("SIGTERM");
-        this.processes.delete(name);
-      }
-    }
+  private waitForExit(proc: ChildProcess, timeoutMs = 5000): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const timer = setTimeout(() => {
+        proc.kill("SIGKILL");
+      }, timeoutMs);
+      proc.on("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+  }
 
-    await sleep(1000);
+  async restartAll(serviceNames: string[]): Promise<void> {
+    await Promise.all(
+      serviceNames.map(async (name) => {
+        const proc = this.processes.get(name);
+        if (proc) {
+          proc.kill("SIGTERM");
+          await this.waitForExit(proc);
+          this.processes.delete(name);
+        }
+      }),
+    );
 
     for (const name of serviceNames) {
       this.start(name);

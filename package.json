@@ -1,8 +1,8 @@
 {
-  "name": "nanny",
-  "version": "1.0.0",
+  "name": "@beyondbasics/nanny",
+  "version": "1.0.1",
   "type": "module",
-  "description": "Process manager for Node.js applications. Restarts services when their dependencies change.",
+  "description": "Dependency-aware process manager for Node.js microservices. Restarts only the services affected by a file change.",
   "main": "dist/api.js",
   "exports": {
     ".": {
@@ -13,11 +13,37 @@
   "bin": {
     "nanny": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/**/*.map"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beyondbasics/nanny.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "sideEffects": false,
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "dev": "tsx src/index.ts",
     "test": "node --import tsx --test src/*.test.ts src/**/*.test.ts"
   },
+  "keywords": [
+    "process-manager",
+    "microservices",
+    "development",
+    "watcher",
+    "hot-reload",
+    "restart",
+    "dependency-graph"
+  ],
   "dependencies": {
     "chokidar": "^4.0.3",
     "dscan": "^1.0.4"
